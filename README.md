@@ -1,2 +1,2 @@
-# dsmax-feedback
+# feedback
 Feedback
