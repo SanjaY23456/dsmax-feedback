@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DS MAX Feedback</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background: url('https://www.dsmaxproperties.com/images/1754979519web.webp') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding-left: 50px;
+    }
+    .container {
+      text-align: center;
+      background: rgba(255,255,255,0.9);
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    button { padding:12px 20px; margin:5px; border:none; border-radius:6px; color:white; font-size:16px; cursor:pointer; transition: transform 0.1s; }
+    button:hover { transform: scale(1.05); }
+    #submitBtn { background-color:#9C27B0; padding:15px 30px; font-size:18px; margin-top:25px; transition: background-color 0.2s; }
+    .selected { box-shadow:0 0 10px 2px #00000066; transform: scale(1.1); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>DS MAX Properties</h1>
+
+    <div>
+      <h3>Rate if you refer your Friends and Family</h3>
+      <button id="nps1" style="background-color:#FF4C4C;" onclick="selectNPS(2)">1-4</button>
+      <button id="nps2" style="background-color:#FFC107;" onclick="selectNPS(6)">5-7</button>
+      <button id="nps3" style="background-color:#4CAF50;" onclick="selectNPS(9)">8-10</button>
+    </div>
+
+    <div>
+      <h3>Rate us For Hospitality</h3>
+      <button id="csat1" style="background-color:#2196F3;" onclick="selectCSAT(1)">1</button>
+      <button id="csat2" style="background-color:#2196F3;" onclick="selectCSAT(2)">2</button>
+      <button id="csat3" style="background-color:#2196F3;" onclick="selectCSAT(3)">3</button>
+      <button id="csat4" style="background-color:#2196F3;" onclick="selectCSAT(4)">4</button>
+      <button id="csat5" style="background-color:#2196F3;" onclick="selectCSAT(5)">5</button>
+    </div>
+
+    <div>
+      <button id="submitBtn" onclick="submitAll()">Submit Feedback</button>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbwUJCG_97V-F1YAJrCBEXgUiR_VY8nPt2aAdo5WK-GVcrADR7zBOZLdOGCnuMz3zWI/exec";
+
+    var selectedNPSValue = null;
+    var selectedCSATValue = null;
+
+    function updateSubmitButtonColor() {
+      var btn = document.getElementById('submitBtn');
+      btn.style.backgroundColor = (selectedNPSValue && selectedCSATValue) ? '#4CAF50' : '#9C27B0';
+    }
+
+    function selectNPS(value) {
+      selectedNPSValue = value;
+      ['nps1','nps2','nps3'].forEach(id => document.getElementById(id).classList.remove('selected'));
+      document.getElementById('nps' + (value<=4?'1':value<=7?'2':'3')).classList.add('selected');
+      updateSubmitButtonColor();
+    }
+
+    function selectCSAT(value) {
+      selectedCSATValue = value;
+      [1,2,3,4,5].forEach(c => document.getElementById('csat'+c).classList.remove('selected'));
+      document.getElementById('csat'+value).classList.add('selected');
+      updateSubmitButtonColor();
+    }
+
+    function submitAll() {
+      if (!selectedNPSValue || !selectedCSATValue) {
+        alert('Please select both NPS and CSAT before submitting.');
+        return;
+      }
+
+      fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({nps:selectedNPSValue, csat:selectedCSATValue}),
+        headers: { 'Content-Type': 'application/json' }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.success) {
+          alert('Your feedback submitted successfully!');
+          selectedNPSValue = null;
+          selectedCSATValue = null;
+          document.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
+          updateSubmitButtonColor();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      })
+      .catch(err => alert('Error: ' + err.message));
+    }
+  </script>
+</body>
+</html>
